@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FamilyHub — My Dashboard</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://googleapis.com');
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8faf8;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e8f0e8;
+            padding: 0 40px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .nav-logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #166534;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-user {
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .nav-logout {
+            background: none;
+            border: 1px solid #d1fae5;
+            color: #166534;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-logout:hover { background: #f0fdf4; }
+
+        .dashboard-background {
+            background: linear-gradient(rgba(248, 250, 248, 0.90), rgba(248, 250, 248, 0.90)), 
+                        url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: calc(100vh - 64px);
+        }
+
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 40px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #166534;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .today-banner {
+            background: linear-gradient(135deg, #fef9c3, #fef3c7);
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .today-banner .banner-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .today-banner .banner-title {
+            font-weight: 700;
+            color: #92400e;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .today-banner .banner-events {
+            font-size: 0.85rem;
+            color: #92400e;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 24px;
+            border: 1px solid #e8f0e8;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9ca3af;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #166534;
+            line-height: 1;
+        }
+
+        .stat-card .stat-sub {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .stat-card.highlight-points {
+            background: linear-gradient(135deg, #fef9c3, #fef3c7);
+            border-color: #fde68a;
+        }
+        .stat-card.highlight-points .stat-label,
+        .stat-card.highlight-points .stat-value {
+            color: #92400e;
+        }
+        .stat-card.highlight-points .stat-sub {
+            color: #ca8a04;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .flex-column-gap {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid #e8f0e8;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .card.border-blue { border-top: 4px solid #3b82f6; }
+        .card.border-amber { border-top: 4px solid #f59e0b; }
+        
+        .card.highlight-tips {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: #bbf7d0;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title.green { color: #166534; }
+        .card-title.blue { color: #2563eb; }
+        .card-title.amber { color: #92400e; }
+        .card-title.gray { color: #6b7280; }
+
+        .card-subtitle {
+            font-size: 0.78rem;
+            color: #9ca3af;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100px;
+        }
+
+        /* ── PROGRESS BAR UI ── */
+        .progress-container {
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            background: #f0fdf4;
+            border-radius: 999px;
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid #d1fae5;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #16a34a, #4ade80);
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+
+        
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .list-item:last-child { border-bottom: none; }
+
+        .item-message { font-weight: 600; font-size: 0.95rem; color: #1f2937; }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 6px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 11px 14px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+            background: #fafafa;
+            transition: border 0.15s;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        input:focus {
+            border-color: #16a34a;
+            background: white;
+            box-shadow: 0 0 0 3px #dcfce7;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #16a34a;
+            color: white;
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+        }
+        .btn-primary:hover { background: #15803d; }
+
+        .tips-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: #374151;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid #f3f4f6;
+            margin: 20px 0;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 32px 16px;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .empty-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .success-msg {
+            color: #16a34a;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+        }
+</style>
+</head>
+
+
+
+        <body>
+    <nav class="navbar">
+      <div class="nav-logo">🏠 FamilyHub</div>
+      <div class="nav-right">
+        <span class="nav-user">👦 <span id="nav-name">Child</span></span>
+        <button class="nav-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </nav>
+    <div class="dashboard-background">
+      <div class="page">
+        
+        <div class="page-header">
+          <h1>Hey, <span id="header-name">Leo</span>! 👋</h1>
+          <p>Here's your tasks and rewards for today.</p>
+        </div
+        <div class="today-banner" id="today-banner" style="display: none">
+          <div class="banner-icon">📅</div>
+          <div>
+            <div class="banner-title">Today's Events</div>
+            <div class="banner-events" id="today-events"></div>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card highlight-points">
+            <div class="stat-label">My Points</div>
+            <div class="stat-value" id="stat-points">0</div>
+            <div class="stat-sub">⭐ keep earning!</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Chores Left</div>
+            <div class="stat-value" id="stat-pending">0</div>
+            <div class="stat-sub">to complete today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Progress</div>
+            <div class="stat-value" id="stat-progress">0%</div>
+            <div class="stat-sub">chores done today</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card border-blue">
+            <div class="card-header">
+              <span class="card-title blue">📋 My Chores</span>
+              <span class="card-subtitle"><span id="done-count">0</span> done today</span>
+            </div>
+
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <div id="chores-list" class="list-container">
+              <div class="empty">
+                <div class="empty-icon">📋</div>
+                No chores assigned yet
+              </div>
+            </div>
+          </div>
+          <div class="flex-column-gap">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title green">🚀 Ask Permission</span>
+              </div>
+              <div class="form-group">
+                <label for="request-msg" class="form-label">What do you want to ask?</label>
+                <input type="text" id="request-msg" placeholder="e.g. Can I go to the skatepark until 8 PM?" />
+              </div>
+              <button class="btn btn-primary" onclick="sendRequest()">
+                Send to Parent →
+              </button>
+              <p class="success-msg" id="sent-msg" style="display: none">
+                ✅ Request sent to parent!
+              </p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title gray">📬 My Requests</span>
+              </div>
+              <div id="requests-list" class="list-container">
+                <div class="empty">
+                  <div class="empty-icon">📬</div>
+                  No requests yet
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card border-amber">
+            <div class="card-header">
+              <span class="card-title amber">🏆 My Rewards</span>
+              <span class="card-subtitle">earn points to unlock</span>
+            </div>
+            <div id="rewards-list" class="list-container">
+              <div class="empty">
+                <div class="empty-icon">🏆</div>
+                No rewards set yet
+              </div>
+            </div>
+          </div>
+
+          <div class="card highlight-tips">
+            <div class="card-header">
+              <span class="card-title green">💡 How points work</span>
+            </div>
+            <div class="tips-list">
+              <div class="tip-item">
+                <span style="font-size: 1.2rem">📋</span>
+                Complete a chore to earn points
+              </div>
+              <div class="tip-item">
+                <span style="font-size: 1.2rem">⭐</span>
+                Each chore has a point value
+              </div>
+              <div class="tip-item">
+                <span style="font-size: 1.2rem">🏆</span>
+                Reach a reward's points to claim it
+              </div>
+              <div class="tip-item">
+                <span style="font-size: 1.2rem">🎉</span>
+                Tell your parent when you're ready!
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <script>
+      const API = "http://localhost:8000";
+      const token = localStorage.getItem("token");
+      const name = localStorage.getItem("name");
+      const userId = localStorage.getItem("user_id");
+
+      if (!token) window.location.href = "index.html";
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      document.getElementById("nav-name").textContent = name;
+      document.getElementById("header-name").textContent = name;
+
+      function logout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+      }
+
+      async function loadAll() {
+        await Promise.all([
+          loadChores(),
+          loadRequests(),
+          loadRewards(),
+          loadTodayEvents(),
+          loadPoints(),
+        ]);
+      }
+
+      async function loadPoints() {
+        try {
+          const res = await fetch(`${API}/users/${userId}`, { headers });
+          const data = await res.json();
+          document.getElementById("stat-points").textContent = data.points;
+        } catch (e) { console.error(e); }
+      }
+
+      async function loadChores() {
+        try {
+          const res = await fetch(`${API}/chores/child/${userId}`, { headers });
+          const data = await res.json();
+
+          const done = data.filter((c) => c.status === "done").length;
+          const pending = data.filter((c) => c.status === "pending").length;
+          const pct = data.length > 0 ? Math.round((done / data.length) * 100) : 0;
+
+          document.getElementById("stat-pending").textContent = pending;
+          document.getElementById("stat-progress").textContent = pct + "%";
+          document.getElementById("done-count").textContent = done;
+          document.getElementById("progress-fill").style.width = pct + "%";
+
+          const list = document.getElementById("chores-list");
+          if (data.length === 0) {
+            list.innerHTML = `
+              <div class="empty">
+                <div class="empty-icon">📋</div>
+                No chores assigned yet
+              </div>`;
+            return;
+          }
+
+          list.innerHTML = data.map(chore => `
+            <div class="list-item ${chore.status === 'done' ? 'done' : ''}">
+              <div class="chore-left">
+                <span class="chore-name">${chore.title}</span>
+                <div class="chore-meta">
+                  <span class="chore-pts">⭐ ${chore.points} pts</span>
+                  ${chore.time ? `<span>🕒 ${chore.time}</span>` : ''}
+                </div>
+              </div>
+              <div>
+                ${chore.status === 'pending' 
+                  ? `<button class="btn btn-small" onclick="completeChore(${chore.id})">Done ✓</button>`
+                  : `<span class="done-badge">Completed</span>`
+                }
+              </div>
+            </div>
+          `).join("");
+        } catch (e) { console.error(e); }
+      }
+      async function completeChore(id) {
+        try {
+          const res = await fetch(`${API}/chores/${id}/complete`, {
+            method: "POST",
+            headers
+          });
+          if (res.ok) {
+            loadAll(); 
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      async function sendRequest() {
+        const msgInput = document.getElementById("request-msg");
+        const message = msgInput.value;
+
+        if (!message) return;
+
+        try {
+          const res = await fetch(`${API}/requests/`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              message: message,
+              child_id: parseInt(userId),
+              status: "pending"
+            }),
+          });
+
+          if (res.ok) {
+            msgInput.value = "";
+            const msg = document.getElementById("sent-msg");
+            msg.style.display = "block";
+            setTimeout(() => (msg.style.display = "none"), 3000);
+            loadRequests();
+          }
+        } catch (e) { console.error(e); }
+      }
+      async function loadRequests() {
+        try {
+          const res = await fetch(`${API}/requests/child/${userId}`, { headers });
+          const data = await res.json();
+          const list = document.getElementById("requests-list");
+
+          if (!data || data.length === 0) {
+            list.innerHTML = `
+              <div class="empty">
+                <div class="empty-icon">📬</div>
+                No requests yet
+              </div>`;
+            return;
+          }
+
+          list.innerHTML = data.map(req => `
+            <div class="list-item">
+              <div class="chore-left">
+                <p class="item-message">"${req.message}"</p>
+                <span class="status ${req.status}">${req.status.toUpperCase()}</span>
+              </div>
+            </div>
+          `).join("");
+        } catch (e) { console.error(e); }
+      }
+      async function loadRewards() {
+        try {
+          const res = await fetch(`${API}/rewards/`, { headers });
+          const data = await res.json();
+          const list = document.getElementById("rewards-list");
+
+          if (!data || data.length === 0) {
+            list.innerHTML = `
+              <div class="empty">
+                <div class="empty-icon">🏆</div>
+                No rewards set yet
+              </div>`;
+            return;
+          }
+
+          list.innerHTML = data.map(reward => `
+            <div class="list-item">
+              <div class="chore-left">
+                <span class="chore-name">${reward.title}</span>
+                <span class="chore-meta">Cost: ${reward.points} points</span>
+              </div>
+              <button class="btn btn-small" onclick="claimReward(${reward.id})">Claim</button>
+            </div>
+          `).join("");
+        } catch (e) { console.error(e); }
+      }
+
+      async function claimReward(id) {
+        try {
+          const res = await fetch(`${API}/rewards/${id}/claim`, { method: "POST", headers });
+          if (res.ok) {
+            loadAll();
+          } else {
+            alert("Not enough points to claim this reward yet!");
+          }
+        } catch (e) { console.error(e); }
+      }
+      async function loadTodayEvents() {
+        try {
+          const res = await fetch(`${API}/events/today`, { headers });
+          const data = await res.json();
+          const banner = document.getElementById("today-banner");
+          const eventsDiv = document.getElementById("today-events");
+
+          if (!data || data.length === 0) {
+            banner.style.display = "none";
+            return;
+          }
+
+          banner.style.display = "flex";
+          eventsDiv.innerHTML = data
+            .map((e) => `• ${e.title}${e.time ? " at " + e.time : ""}`)
+            .join(" &nbsp;|&nbsp; ");
+        } catch (e) { console.error(e); }
+      }
+
+      loadAll();
+    </script>
+</body>
+</html>

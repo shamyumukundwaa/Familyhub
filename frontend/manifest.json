@@ -1,0 +1,21 @@
+{
+  "name": "FamilyHub",
+  "short_name": "FamilyHub",
+  "description": "Family chores, permissions and rewards",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#f8faf8",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "family.jpg",
+      "sizes": "192x192",
+      "type": "family.jpg"
+    },
+    {
+      "src": "fam.jpg",
+      "sizes": "512x512",
+      "type": "fam.jpg"
+    }
+  ]
+}

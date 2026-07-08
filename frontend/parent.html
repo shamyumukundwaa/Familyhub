@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FamilyHub — Parent Dashboard</title>
+    <link rel="manifest" href="manifest.json" />
+    <style>
+      @import url("https://googleapis.com");
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: #f8faf8;
+        color: #1a1a1a;
+        min-height: 100vh;
+      }
+
+      .navbar {
+        background: white;
+        border-bottom: 1px solid #e8f0e8;
+        padding: 0 40px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+      }
+
+      .nav-logo {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #166534;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .nav-user {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      .nav-logout {
+        background: none;
+        border: 1px solid #d1fae5;
+        color: #166534;
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      .nav-logout:hover {
+        background: #f0fdf4;
+      }
+
+      .dashboard-background {
+        background:
+          linear-gradient(rgba(248, 250, 248, 0.9), rgba(248, 250, 248, 0.9)),
+          url("https://unsplash.com") no-repeat center center fixed;
+        background-size: cover;
+        min-height: calc(100vh - 64px);
+      }
+
+      .page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 40px;
+      }
+
+      .page-header {
+        margin-bottom: 32px;
+      }
+
+      .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #166534;
+        margin-bottom: 4px;
+      }
+
+      .page-header p {
+        color: #6b7280;
+        font-size: 0.95rem;
+      }
+
+      .today-banner {
+        background: linear-gradient(135deg, #fef9c3, #fef3c7);
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        padding: 14px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .today-banner .banner-icon {
+        font-size: 1.4rem;
+        flex-shrink: 0;
+      }
+
+      .today-banner .banner-title {
+        font-weight: 700;
+        color: #92400e;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+      }
+
+      .today-banner .banner-events {
+        font-size: 0.85rem;
+        color: #92400e;
+      }
+
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px 24px;
+        border: 1px solid #e8f0e8;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.01);
+      }
+
+      .stat-card .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #9ca3af;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #166534;
+        line-height: 1;
+      }
+
+      .stat-card .stat-sub {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        margin-top: 4px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid #e8f0e8;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+      }
+
+      .card.border-red {
+        border-top: 4px solid #dc2626;
+      }
+      .card.border-blue {
+        border-top: 4px solid #3b82f6;
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 12px;
+      }
+
+      .card-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card-title.green {
+        color: #166534;
+      }
+      .card-title.red {
+        color: #dc2626;
+      }
+      .card-title.amber {
+        color: #92400e;
+      }
+
+      .card-subtitle {
+        font-size: 0.78rem;
+        color: #9ca3af;
+      }
+
+      .card-count {
+        background: #f0fdf4;
+        color: #166534;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        border: 1px solid #d1fae5;
+      }
+
+      .card-count.red {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+      }
+
+      .card-count.bg-amber {
+        background: #fef9c3;
+        color: #92400e;
+        border-color: #fde68a;
+      }
+
+      .list-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100px;
+      }
+      .list-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 0;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .list-item:last-child {
+        border-bottom: none;
+      }
+
+      .chore-left {
+        flex: 1;
+      }
+      .item-message {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1f2937;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #6b7280;
+        margin-bottom: 6px;
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 11px 14px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        outline: none;
+        background: #fafafa;
+        transition: border 0.15s;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: #16a34a;
+        background: white;
+        box-shadow: 0 0 0 3px #dcfce7;
+      }
+
+      .input-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: inherit;
+      }
+
+      .btn-primary {
+        background: #16a34a;
+        color: white;
+        width: 100%;
+        padding: 12px;
+        margin-top: 6px;
+      }
+      .btn-primary:hover {
+        background: #15803d;
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn-deny {
+        background: white;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        padding: 8px 16px;
+      }
+      .btn-deny:hover {
+        background: #fef2f2;
+      }
+
+      .btn-approve {
+        background: #16a34a;
+        color: white;
+        padding: 8px 16px;
+      }
+      .btn-approve:hover {
+        background: #15803d;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid #f3f4f6;
+        margin: 20px 0;
+      }
+
+      .empty {
+        text-align: center;
+        padding: 32px 16px;
+        color: #9ca3af;
+        font-size: 0.9rem;
+      }
+
+      .empty-icon {
+        font-size: 2rem;
+        margin-bottom: 8px;
+      }
+
+      .success-msg {
+        color: #16a34a;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 8px;
+        background: #f0fdf4;
+        border-radius: 8px;
+        margin-top: 8px;
+      }
+
+      @media (max-width: 768px) {
+        .navbar {
+          padding: 0 20px;
+        }
+        .page {
+          padding: 20px;
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+        .stats-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .input-row {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-logo">🏠 FamilyHub</div>
+      <div class="nav-right">
+        <span class="nav-user">👩 <span id="nav-name">Parent</span></span>
+        <button class="nav-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </nav>
+    <div class="dashboard-background">
+      <div class="page">
+        <div class="page-header">
+          <h1>Welcome back, <span id="header-name">Sarah</span>! 👋</h1>
+          <p>Here's what's happening in your family today.</p>
+        </div>
+
+        <div class="today-banner" id="today-banner" style="display: none">
+          <div class="banner-icon">📅</div>
+          <div>
+            <div class="banner-title">Today's Events</div>
+            <div class="banner-events" id="today-events"></div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Pending Requests</div>
+            <div class="stat-value" id="stat-requests">0</div>
+            <div class="stat-sub">need your response</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Children</div>
+            <div class="stat-value" id="stat-children">0</div>
+            <div class="stat-sub">in your family</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Upcoming Events</div>
+            <div class="stat-value" id="stat-events">0</div>
+            <div class="stat-sub">in the next 7 days</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card border-red">
+            <div class="card-header">
+              <span class="card-title red">🔔 Permission Requests</span>
+              <span class="card-count red" id="perm-badge">0</span>
+            </div>
+            <div id="permissions-list" class="list-container">
+              <div class="empty">
+                <div class="empty-icon">✅</div>
+              </div>
+            </div>
+          </div>
+
+    
+          <div class="card border-blue">
+            <div class="card-header">
+              <span class="card-title green">📊 Family Overview</span>
+              <span class="card-subtitle">Today's chores</span>
+            </div>
+            <div id="family-overview" class="list-container">
+              <div class="empty">
+                <div class="empty-icon">👨‍👩‍👧</div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+         
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title green">➕ Assign a Chore</span>
+            </div>
+
+            <div class="form-group">
+              <label for="chore-title" class="form-label">Chore title</label>
+              <input
+                type="text"
+                id="chore-title"
+                placeholder="e.g. Feed the dog, Take out trash"
+              />
+            </div>
+
+            <div class="input-row">
+              <div class="form-group">
+                <label for="chore-time" class="form-label">Due time</label>
+                <input type="text" id="chore-time" placeholder="e.g. 5pm" />
+              </div>
+              <div class="form-group">
+                <label for="chore-points" class="form-label">Points</label>
+                <input type="number" id="chore-points" value="10" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="chore-child" class="form-label">Assign to</label>
+              <select id="chore-child">
+                <option value="">Choose a child...</option>
+              </select>
+            </div>
+
+            <button class="btn btn-primary" onclick="assignChore()">
+              Assign Chore →
+            </button>
+
+            <p class="success-msg" id="chore-success" style="display: none">
+              ✅ Chore assigned successfully!
+            </p>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title amber">📅 Upcoming Events</span>
+              <span class="card-count bg-amber" id="events-badge">0</span>
+            </div>
+
+            <div id="events-list" class="list-container">
+              <div class="empty">
+                <div class="empty-icon">🗓️</div>
+                No events in the next 7 days
+              </div>
+            </div>
+
+            <hr class="divider" />
+
+            <div class="form-group">
+              <label for="event-title" class="form-label">Add an event</label>
+              <input
+                type="text"
+                id="event-title"
+                placeholder="e.g. Leo's Birthday 🎂"
+              />
+            </div>
+
+            <div class="input-row">
+              <div class="form-group">
+                <label for="event-date" class="form-label">Date</label>
+                <input type="date" id="event-date" />
+              </div>
+              <div class="form-group">
+                <label for="event-time" class="form-label"
+                  >Time (optional)</label
+                >
+                <input type="time" id="event-time" />
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveEvent()">
+              Save Event →
+            </button>
+
+            <p class="success-msg" id="event-success" style="display: none">
+              ✅ Event saved successfully!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const API = "http://localhost:8000";
+      const token = localStorage.getItem("token");
+      const name = localStorage.getItem("name");
+
+      if (!token) window.location.href = "index.html";
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+
+      document.getElementById("nav-name").textContent = name;
+      document.getElementById("header-name").textContent = name;
+
+      function logout() {
+        localStorage.clear();
+        window.location.href = "index.html";
+      }
+
+      async function loadAll() {
+        await Promise.all([
+          loadPermissions(),
+          loadFamilyOverview(),
+          loadTodayEvents(),
+          loadUpcomingEvents(),
+          loadChildren(),
+        ]);
+      }
+
+      async function loadPermissions() {
+        try {
+          const res = await fetch(`${API}/requests/pending`, { headers });
+          const data = await res.json();
+
+          document.getElementById("stat-requests").textContent = data.length;
+          document.getElementById("perm-badge").textContent = data.length;
+
+          const list = document.getElementById("permissions-list");
+
+          if (!data || data.length === 0) {
+            list.innerHTML = `
+              <div class="empty">
+                <div class="empty-icon">✅</div>
+                No pending requests right now
+              </div>`;
+            return;
+          }
+
+          list.innerHTML = data
+            .map(
+              (req) => `
+            <div class="list-item">
+              <div class="chore-left">
+                <p class="item-message">"${req.message}"</p>
+              </div>
+              <div class="btn-row">
+                <button class="btn btn-deny" onclick="respond(${req.id}, 'denied')">Deny</button>
+                <button class="btn btn-approve" onclick="respond(${req.id}, 'approved')">Approve ✓</button>
+              </div>
+            </div>`,
+            )
+            .join("");
+        } catch (e) {
+          console.error("Error loading permissions:", e);
+        }
+      }
+      async function loadChildren() {
+        try {
+          const res = await fetch(`${API}/users/children`, { headers });
+          if (!res.ok) return;
+
+          const children = await res.json();
+          const select = document.getElementById("chore-child");
+
+          select.innerHTML = '<option value="">Choose a child...</option>';
+          children.forEach((child) => {
+            select.innerHTML += `<option value="${child.id}">${child.name}</option>`;
+          });
+        } catch (e) {
+          console.error("Error loading children dropdown:", e);
+        }
+      }
+
+      async function assignChore() {
+        const title = document.getElementById("chore-title").value;
+        const time = document.getElementById("chore-time").value;
+        const points = document.getElementById("chore-points").value;
+        const childId = document.getElementById("chore-child").value;
+
+        if (!title || !childId) {
+          alert("Please fill in the chore title and choose a child!");
+          return;
+        }
+
+        try {
+          const res = await fetch(`${API}/chores/`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              title,
+              time: time || null,
+              points: parseInt(points) || 10,
+              child_id: parseInt(childId),
+              status: "pending",
+            }),
+          });
+
+          if (res.ok) {
+            const msg = document.getElementById("chore-success");
+            msg.style.display = "block";
+
+            document.getElementById("chore-title").value = "";
+            document.getElementById("chore-time").value = "";
+
+            setTimeout(() => (msg.style.display = "none"), 3000);
+            loadFamilyOverview();
+          }
+        } catch (e) {
+          console.error("Error assigning chore:", e);
+        }
+      }
+
+      async function loadFamilyOverview() {
+        try {
+          const res = await fetch(`${API}/chores/family`, { headers });
+          const data = await res.json();
+
+          document.getElementById("stat-children").textContent =
+            data.total_children || 0;
+          const container = document.getElementById("family-overview");
+
+          if (!data.children || data.total_children === 0) {
+            container.innerHTML = `
+              <div class="empty">
+                <div class="empty-icon">👨‍👩‍👧</div>
+                No children added yet
+              </div>`;
+            return;
+          }
+
+          container.innerHTML = data.children
+            .map(
+              (child) => `
+            <div class="list-item">
+              <div class="chore-left">
+                <span class="chore-name">${child.name}</span>
+                <div class="chore-meta">
+                  <span>${child.pending_chores} left today</span>
+                  <span class="chore-pts">⭐ ${child.points} pts</span>
+                </div>
+              </div>
+              <div class="progress-wrap" style="width: 120px; margin-bottom: 0;">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: ${child.completion_pct}%"></div>
+                </div>
+              </div>
+            </div>
+          `,
+            )
+            .join("");
+        } catch (e) {
+          console.error("Error loading family overview:", e);
+        }
+      }
+
+      async function respond(id, status) {
+        try {
+          const res = await fetch(`${API}/requests/${id}/respond`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({ status }),
+          });
+
+          if (res.ok) {
+            loadPermissions();
+          }
+        } catch (e) {
+          console.error("Error processing permission response:", e);
+        }
+      }
+      async function loadUpcomingEvents() {
+        try {
+          const res = await fetch(`${API}/events/`, { headers });
+          const data = await res.json();
+
+          document.getElementById("stat-events").textContent = data.length || 0;
+
+          const list = document.getElementById("events-list");
+          if (!data || data.length === 0) {
+            list.innerHTML = `
+              <div class="empty">
+                <div class="empty-icon">🗓️</div>
+                No events in the next 7 days
+              </div>`;
+            return;
+          }
+
+          list.innerHTML = data
+            .map(
+              (event) => `
+            <div class="event-item">
+              <span class="event-name">${event.title}</span>
+              <span class="event-date">${event.date} ${event.time || ""}</span>
+            </div>
+          `,
+            )
+            .join("");
+        } catch (e) {
+          console.error("Error loading upcoming events:", e);
+        }
+      }
+      async function loadTodayEvents() {
+        try {
+          const res = await fetch(`${API}/events/today`, { headers });
+          const data = await res.json();
+          const banner = document.getElementById("today-banner");
+          const eventsDiv = document.getElementById("today-events");
+
+          if (!data || data.length === 0) {
+            banner.style.display = "none";
+            return;
+          }
+
+          banner.style.display = "flex";
+          eventsDiv.innerHTML = data
+            .map((e) => `• ${e.title}${e.time ? " at " + e.time : ""}`)
+            .join(" &nbsp;|&nbsp; ");
+        } catch (e) {
+          console.error("Error loading today's events:", e);
+        }
+      }
+
+      async function saveEvent() {
+        const title = document.getElementById("event-title").value;
+        const date = document.getElementById("event-date").value;
+        const time = document.getElementById("event-time").value;
+
+        if (!title || !date) return;
+
+        try {
+          await fetch(`${API}/events/`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              title,
+              date,
+              time: time || null,
+              visible_to: "all",
+            }),
+          });
+
+          document.getElementById("event-title").value = "";
+          document.getElementById("event-date").value = "";
+          document.getElementById("event-time").value = "";
+
+          const msg = document.getElementById("event-success");
+          msg.style.display = "block";
+          setTimeout(() => (msg.style.display = "none"), 3000);
+          loadUpcomingEvents();
+          loadTodayEvents();
+        } catch (e) {
+          console.error("Error saving event:", e);
+        }
+      }
+
+      loadAll();
+    </script>
+  </body>
+</html>
