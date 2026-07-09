@@ -8,7 +8,6 @@ router = APIRouter(prefix="/rewards", tags=["Rewards"])
 
 @router.post("/", response_model=schemas.RewardOut, status_code=status.HTTP_201_CREATED)
 def create_reward(reward: schemas.RewardCreate, db: Session = Depends(get_db)):
-    # Fixed: Replaced deprecated `.dict()` with `.model_dump()` & removed hidden spaces
     new_reward = models.Reward(**reward.model_dump())
     db.add(new_reward)
     db.commit()

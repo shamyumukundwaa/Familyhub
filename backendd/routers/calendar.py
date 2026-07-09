@@ -9,7 +9,6 @@ router = APIRouter(prefix="/events", tags=["Calendar"])
 
 @router.post("/", response_model=schemas.EventOut, status_code=status.HTTP_201_CREATED)
 def create_event(event: schemas.EventCreate, db: Session = Depends(get_db)):
-    # Fixed: Replaced deprecated `.dict()` with `.model_dump()` and cleaned syntax spaces
     new_event = models.Event(**event.model_dump())
     db.add(new_event)
     db.commit()
@@ -19,7 +18,6 @@ def create_event(event: schemas.EventCreate, db: Session = Depends(get_db)):
 
 @router.get("/today", response_model=list[schemas.EventOut])
 def get_today_events(db: Session = Depends(get_db)):
-    # Fixed: Using native date object instead of string casting
     today = date.today()
     events = db.query(models.Event).filter(models.Event.date == today).all()
     return events
@@ -27,7 +25,7 @@ def get_today_events(db: Session = Depends(get_db)):
 
 @router.get("/upcoming", response_model=list[schemas.EventOut])
 def get_upcoming(db: Session = Depends(get_db)):
-    # Fixed: Using native date objects for safer SQLAlchemy range filtering
+    
     today = date.today()
     next_week = today + timedelta(days=7)
 

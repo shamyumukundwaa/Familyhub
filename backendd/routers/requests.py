@@ -10,7 +10,6 @@ router = APIRouter(prefix="/requests", tags=["Permission Requests"])
     "/", response_model=schemas.RequestOut, status_code=status.HTTP_201_CREATED
 )
 def create_request(req: schemas.RequestCreate, db: Session = Depends(get_db)):
-    # Validate that the child actually exists before creating the request
     child_exists = db.query(models.User).filter(models.User.id == req.child_id).first()
     if not child_exists:
         raise HTTPException(
