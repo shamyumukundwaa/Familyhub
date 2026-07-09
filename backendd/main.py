@@ -10,13 +10,13 @@ app = FastAPI(title="FamilyHub API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows local browser file paths (file:///) to connect
-    allow_credentials=False,  # Must be set to False when allowing all origins via "*"
+    allow_origins=["*"],  
+    allow_credentials=False, 
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Register all routers
+
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(chores.router)
