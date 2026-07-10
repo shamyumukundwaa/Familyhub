@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from database import Base
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class User(Base):
@@ -40,7 +40,7 @@ class PermissionRequest(Base):
     id = Column(Integer, primary_key=True, index=True)
     message = Column(String, nullable=False)
     status = Column(String, default="pending")
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default= lambda: datetime.now(timezone.utc))
     child_id = Column(Integer, ForeignKey("users.id"))
 
     child = relationship("User", back_populates="requests")
@@ -61,7 +61,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
-    date = Column(String, nullable=False)  # Matches your calendar.py logic
+    date = Column(String, nullable=False)  
     time = Column(String, nullable=True)
     visible_to = Column(String, default="all")
 
